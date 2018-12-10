@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% from 'macros.html' import photo_card with context %}
+
+{% block title %}{{ tag.name }}{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1><small><span class="oi oi-tag"></span></small> {{ tag.name }}
+            <small class="text-muted">{{ tag.photos|length }} photos</small>
+            {% if current_user.can('MODERATE') %}
+                <a class="btn btn-danger btn-sm" href="{{ url_for('admin.delete_tag', tag_id=tag.id) }}"
+                   onclick="return confirm('确定删除标签？')">
+                    删除
+                </a>
+            {% endif %}
+            <span class="dropdown">
+                <button class="btn btn-secondary btn-sm" data-toggle="dropdown">
+                    {{ order_rule }} <span class="oi oi-caret-bottom"></span>
+                </button>
+                <div class="dropdown-menu">
+                    {% if order_rule=='按收藏排序' %}
+                        <a class="dropdown-item" href="{{ url_for('main.show_tag',tag_id=tag.id,order='by_time') }}">
+                            按时间排序
+                        </a>
+                    {% else %}
+                        <a class="dropdown-item" href="{{ url_for('main.show_tag',tag_id=tag.id,order='by_collects') }}">
+                            按收藏排序
+                        </a>
+                    {% endif %}
+                </div>
+            </span>
+        </h1>
+    </div>
+    <div class="row">
+        {% for photo in photos %}
+            {{ photo_card(photo) }}
+        {% endfor %}
+    </div>
+    <div class="page-footer">
+        {{ render_pagination(pagination) }}
+    </div>
+{% endblock %}

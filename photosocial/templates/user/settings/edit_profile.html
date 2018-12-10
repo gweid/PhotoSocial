@@ -1,0 +1,12 @@
+{% extends 'user/settings/base.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+
+{% block title %}Edit Profile{% endblock %}
+{% block setting_content %}
+    <div class="card bg-light w-100">
+        <h3 class="card-header">编辑资料</h3>
+        <div class="card-body">
+            {{ render_form(form) }}
+        </div>
+    </div>
+{% endblock %}

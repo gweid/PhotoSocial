@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% from 'macros.html' import photo_card %}
+
+{% block title %}{{ user.name}}'s collections{% endblock %}
+
+{% block content %}
+    {% include 'user/_header.html' %}
+    <div class="row">
+        <div class="col-md-12">
+            {% if user.public_collections or current_user==user %}
+                {% if collects %}
+                    {% for collect in collects %}
+                        {{ photo_card(collect.collected) }}
+                    {% endfor %}
+                {% else %}
+                    <div class="tip">
+                        <h3>没有收藏</h3>
+                        <a href="{{ url_for('main.explore') }}">去转转</a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="tip">
+                    <h3>该用户的收藏仅自己可见...</h3>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% if collects %}
+        <div class="page-footer">
+            {{ render_pagination(pagination,align='center') }}
+        </div>
+    {% endif %}
+{% endblock%}

@@ -1,0 +1,78 @@
+{% macro photo_card(photo) %}
+    <div class="photo-card card">
+        <a class="card-thumbnail" href="{{ url_for('main.show_photo', photo_id=photo.id) }}">
+            <img class="card-img-top portrait" src="{{ url_for('main.get_image', filename=photo.filename_s) }}">
+        </a>
+        <div class="card-body">
+            <span class="oi oi-star"></span> {{ photo.collectors|length }}
+            <span class="oi oi-comment-square"></span> {{ photo.comments|length }}
+            {% if request.args.get('candelete')=='collect' %}
+                <form class="inline" method="post" action="{{ url_for('main.uncollect',photo_id=photo.id) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-link btn-md user_collect_btn" onclick="return confirm('确定取消收藏吗');">
+                        <span class="oi oi-trash"></span>
+                    </button>
+                </form>
+            {% endif %}
+            {% if request.args.get('candelete')=='photo' %}
+                <form class="inline" method="post" action="{{ url_for('main.delete_photo',photo_id=photo.id,candelete='photo') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-link btn-md user_collect_btn" onclick="return confirm('确定删除吗');">
+                        <span class="oi oi-trash"></span>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
+<!--用户资料弹窗-->
+{% macro user_card(user) %}
+    <div class="user-card text-center">
+        <a href="{{ url_for('user.index',username=user.username) }}">
+            <img class="rounded avatar_m" src="{{ url_for('main.get_avatar',filename=user.avatar_m) }}">
+        </a>
+        <h6>
+            <a href="{{ url_for('user.index',username=user.username) }}">{{ user.name }}</a>
+        </h6>
+        {{ follow_area(user) }}
+    </div>
+{% endmacro %}
+
+<!--关注-->
+{% macro follow_area(user) %}
+    {% if current_user.is_authenticated %}
+        {% if user != current_user %}  <!--不对用户自己显示关注按钮-->
+            {% if current_user.is_followed(user) %}  <!--当前用户正在关注该用户是显示取消关注按钮-->
+                <form class="inline" method="post"
+                      action="{{ url_for('user.unfollow',username=user.username,next=request.full_path) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-dark btn-sm">
+                        取消关注
+                    </button>
+                    {% if current_user.is_followed_by(user) %}  <!--如果当前用户同时被该用户关注，则显示互相关注-->
+                        <p class="badge badge-light">互相关注</p>
+                    {% endif %}
+                </form>
+            {% else %}
+                <form class="inline" method="post"
+                      action="{{ url_for('user.follow',username=user.username,next=request.full_path) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        关注
+                    </button>
+                    {% if current_user.is_followed_by(user) %}  <!--如果该用户关注了拟则显示关注了你-->
+                        <p class="badge badge-light">关注了你</p>
+                    {% endif %}
+                </form>
+            {% endif %}
+        {% endif %}
+    {% else %} <!--如果用户没有登陆-->
+        <form class="inline" method="post" action="{{ url_for('user.follow',username=user.username) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-primary btn-sm">
+                关注
+            </button>
+        </form>
+    {% endif %}
+{% endmacro %}

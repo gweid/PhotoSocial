@@ -1,0 +1,8 @@
+<p>你好，{{ user.username }}，</p>
+<p>欢迎来到<b>维度图片社交网</b>!</p>
+<p>请访问下面的链接以验证您的电子邮件地址：<br>
+    <a href="{{ url_for('auth.confirm',token=token,_external=True) }}">
+        {{ url_for('auth.confirm', token=token, _external=True) }}
+    </a>
+</p>
+<small>(请不要回复此通知，此收件箱未被监视)</small>

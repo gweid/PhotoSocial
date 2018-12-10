@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% from 'macros.html' import user_card with context %}  <!--with context是作为上下文的意思-->
+
+{% block title %}Collectors{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <div class="row">
+            <div class="col-md-12">
+                <a class="btn btn-outline-primary btn-sm" href="{{ url_for('main.show_photo',photo_id=photo.id) }}">
+                    <span class="oi oi-arrow-left"></span> 返回
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <h3>{{ photo.collectors|length }}个收藏者</h3>
+            {% for collect in collects %}
+                {{ user_card(user=collect.collector) }}
+            {% endfor %}
+        </div>
+    </div>
+    {% if collects %}
+        <div class="page-footer">
+            {{ render_pagination(pagination, align="center") }}
+        </div>
+    {% endif %}
+{% endblock %}

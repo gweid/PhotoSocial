@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% from 'bootstrap/pagination.html' import render_pagination %}
+{% from 'macros.html' import photo_card, user_card with context %}
+
+{% block title %}Search: {{ q }}{% endblock %}
+
+{% block content %}
+    <div class="page-header">
+        <h1>关键词：{{ q }}</h1>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="nav nav-pills flex-column">
+                <a class="nav-item nav-link {% if category == 'photo' %}active{% endif %}"
+                   href="{{ url_for('main.search',q=q,category='photo') }}">图片
+                </a>
+                <a class="nav-item nav-link {% if category == 'user' %}active{% endif %}"
+                   href="{{ url_for('main.search',q=q,category='user') }}">用户
+                </a>
+                <a class="nav-item nav-link {% if category == 'tag' %}active{% endif %}"
+                   href="{{ url_for('main.search',q=q,category='tag') }}">标签
+                </a>
+            </div>
+        </div>
+        <div class="col-md-9">
+            {% if results %}
+                <h5>共 <b class="badge badge-warning">{{ results|length }}</b> 条搜索结果</h5>
+                {% for item in results %}
+                    {% if category == 'photo' %}
+                        {{ photo_card(item) }}
+                    {% elif category == 'user' %}
+                        {{ user_card(item) }}
+                    {% else %}
+                        <a class="badeg badge-light" href="{{ url_for('main.show_tag',tag_id=item.id) }}">
+                            {{ item.name }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <h5 class="tip">没有搜索结果</h5>
+            {% endif %}
+        </div>
+    </div>
+    {% if results %}
+        <div class="page-footer">
+            {{ render_pagination(pagination, align='right') }}
+        </div>
+    {% endif %}
+{% endblock %}

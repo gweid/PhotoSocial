@@ -1,0 +1,8 @@
+你好，{{ user.username }}，
+
+欢迎来到维度图片社交网！
+
+请访问下面的链接以验证您的电子邮件地址：
+    {{ url_for('auth.confirm',token=token,_external=True) }}
+
+(请不要回复此通知，此收件箱未被监视)

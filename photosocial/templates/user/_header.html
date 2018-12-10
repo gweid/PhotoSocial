@@ -1,0 +1,87 @@
+{% from 'bootstrap/nav.html' import render_nav_item %}
+{% from 'macros.html' import follow_area with context %}
+
+<div class="row">
+    <div class="col-md-3">
+        <a href="{% if current_user == user %}{{ url_for('.change_avatar') }}{% else %}#{% endif %}"
+           title="Change avatar">
+            <img class="img-fluid rounded" src="{{ url_for('main.get_avatar',filename=user.avatar_l) }}">
+        </a>
+    </div>
+    <div class="col-md-9">
+        <h1>{{ user.name }}
+            <small class="text-muted">{{ user.username }}</small>
+        </h1>
+        {% if user.bio %}{{ user.bio }}{% endif %}
+        <p>
+            {% if user.website %}
+                <span class="oi oi-link-intact"></span>
+                <a href="{{ user.website }}" target="_blank">{{ user.website|truncate(30) }}</a>&nbsp;&nbsp;
+            {% endif %}
+            {% if user.location %}
+                <span class="oi oi-map-marker"></span>
+                <a href="https://google.com/maps?q={{ user.location }}">{{ user.location|truncate(20) }}</a>&nbsp;&nbsp;
+            {% endif %}
+            <span class="oi oi-calendar"></span>
+            加入 {{ moment(user.member_since).format('LL') }}
+        </p>
+        <div>
+            {% if current_user != user %}
+                {% if current_user.can('MODERATE') %}
+                    {% if not user.can('ADMINISTER') %}
+                        {% if user.locked %} <!--显示解除锁定-->
+                            <form class="inline" method="post" action="{{ url_for('admin.unlock_user',user_id=user.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-secondary btn-sm">
+                                    解除锁定 <span class="oi oi-lock-locked"></span>
+                                </button>
+                            </form>
+                        {% else %} <!--显示锁定-->
+                            <form class="inline" method="post" action="{{ url_for('admin.lock_user',user_id=user.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-warning btn-sm">锁定</button>
+                            </form>
+                        {% endif %}
+                        {% if user.active %}
+                            <form class="inline" method="post" action="{{ url_for('admin.block_user',user_id=user.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-warning btn-sm">封禁</button>
+                            </form>
+                        {% else %}
+                            <form class="inline" method="post" action="{{ url_for('admin.unblock_user',user_id=user.id) }}">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button type="submit" class="btn btn-secondary btn-sm">
+                                    解除封禁 <span class="oi oi-circle-x"></span>
+                                </button>
+                            </form>
+                        {% endif %}
+                        <a class="btn btn-outline-primary btn-sm" href="mailto:{{ user.email }}">Email</a>
+                    {% endif %}
+                {% endif %}
+                {% if current_user.is_admin %}
+                    <a class="btn btn-warning btn-sm" href="{{ url_for('admin.edit_profile_admin',user_id=user.id) }}">
+                        编辑用户
+                    </a>
+                {% endif %}
+            {% endif %}
+            <div class="float-right">
+                {{ follow_area(user) }}
+                {% if current_user.is_authenticated and user == current_user %}
+                    <a class="btn btn-outline-primary btn-sm" href="{{ url_for('user.edit_profile') }}">
+                        编辑资料
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="user-nav">
+    <ul class="nav nav-tabs">
+        <!--额外传入的关键字参数username会被传入url_for-->
+        {{ render_nav_item('user.index', '图片', user.photos|length, username=user.username,candelete='photo') }}
+        {{ render_nav_item('user.show_collections','收藏',user.collections|length,username=user.username,candelete='collect') }}
+        <!-- 因为自己关注了自己，但不需要在关注、粉丝界面显示自己，所以数量减一 -->
+        {{ render_nav_item('user.show_following','关注',user.following.count()-1,username=user.username) }}
+        {{ render_nav_item('user.show_followed','粉丝',user.followers.count()-1,username=user.username) }}
+    </ul>
+</div>

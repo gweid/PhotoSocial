@@ -1,0 +1,133 @@
+<div class="comments" id="comments">
+    <h3>{{ photo.comments|length }} 条评论
+        <small>
+            <a href="{{ url_for('main.show_photo',photo_id=photo.id,page=pagination.pages or 1) }}#comment-form">
+                最早
+            </a>
+        </small>
+        {% if current_user == photo.author %}
+            <form class="inline" method="post" action="{{ url_for('main.set_comment',photo_id=photo.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-link btn-xs float-right">
+                    {% if photo.can_comment %}关闭{% else %}开启{% endif %}评论
+                </button>
+            </form>
+        {% endif %}
+    </h3>
+    <hr>
+    {% if comments %}
+        {% for comment in comments %}
+            <div class="comment">
+                <div class="comment-thumbnail">
+                    <a href="{{ url_for('user.index', username=comment.author.username) }}">
+                        <img class="rounded img-fluid avatar-s profile-popover"
+                             data-href="{{ url_for('ajax.get_profile', user_id=comment.author.id) }}"
+                             src="{{ url_for('main.get_avatar', filename=comment.author.avatar_m) }}">
+                    </a>
+                </div>
+                <div class="comment-body">
+                    <h6>
+                        <a class="profile-popover"
+                           data-href="{{ url_for('ajax.get_profile', user_id=comment.author.id) }}"
+                           href="{{ url_for('user.index', username=comment.author.username) }}">
+                            {{ comment.author.name }}
+                        </a>
+                        {% if current_user == photo.author %}
+                            <span class="badge badge-light">作者</span>
+                        {% endif %}
+                        {% if comment.replied %}
+                            <span class="badge badge-warning">
+                                回复{{ comment.replied.author.name }}
+                            </span>
+                        {% endif %}
+                        <small data-toggle="tooltip" data-placement="top" data-timestamp="{{ comment.timestamp }}"
+                               data-delay="500">
+                            {{ moment(comment.timestamp).fromNow(refresh=True) }}
+                        </small>
+                        {% if current_user.is_authenticated %}
+                            <span class="float-right">
+                                <span class="dropdown">
+                                    <button class="btn bnt-sm btn-light" data-toggle="dropdown">
+                                        <span class="oi oi-ellipses"></span>
+                                    </button>
+                                    <span class="dropdown-menu">
+                                        {% if current_user != comment.author %}
+                                            <a class="dropdown-item btn"
+                                               href="{{ url_for('main.reply_comment', comment_id=comment.id) }}">
+                                                <span class="oi oi-comment-square"></span> 回复
+                                            </a>
+                                        {% endif %}
+                                        {% if current_user == comment.author or current_user == photo.author or current_user.can('MODERATE')%}
+                                            <a class="dropdown-item" data-toggle="modal" href="#!"
+                                               data-href="{{ url_for('main.delete_comment', comment_id=comment.id) }}"
+                                               data-target="#confirm-delete">
+                                                <span class="oi oi-trash" aria-hidden="true"></span> 删除
+                                            </a>
+                                        {% endif %}
+                                        {% if current_user != comment.author %}
+                                            <form class="inline" method="post"
+                                                  action="{{ url_for('main.report_comment',comment_id=comment.id) }}">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="dropdown-item">
+                                                    <span class="oi oi-warning"></span> 举报
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </span>
+                                </span>
+                            </span>
+                        {% endif %}
+                    </h6>
+                    {% if comment.replied %}
+                        <p class="alert alert-dark reply-body col-sm-11">
+                            <b>
+                                {{ comment.replied.author.name }}
+                            </b>:
+                            <br>{{ comment.replied.body }}
+                        </p>
+                    {% endif %}
+                    <p class="mb-1">{{ comment.body }}</p>
+                </div>
+            </div>
+            <hr>
+        {% endfor %}
+        <div class="page-footer">
+            {{ render_pagination(pagination) }}
+        </div>
+    {% else %}
+        <div class="tip">评论溜走了...</div>
+    {% endif %}
+
+    {% if photo.can_comment %}
+        {% if current_user.is_authenticated %}
+            {% if current_user.can('COMMENT') %}
+                {% if request.args.get('reply') %}
+                    <div class="alert alert-dark">
+                        回复{{ request.args.get('author') }}:
+                        <a class="float-right" href="{{ url_for('main.show_photo',photo_id=photo.id) }}">返回</a>
+                    </div>
+                {% endif %}
+                <div class="comment-form-area">
+                    <div class="comment-form-thumbnail">
+                        <img class="rounded img-fluid avatar-s"
+                             src="{{ url_for('main.get_avatar',filename=current_user.avatar_m) }}">
+                    </div>
+                    <div class="comment-form" id="comment-form">
+                        {{ render_form(comment_form, action=url_for('main.new_comment', photo_id=photo.id,
+                            page=pagination.pages or 1, reply=request.args.get('reply')),
+                            extra_classes="text-right") }}
+                    </div>
+                </div>
+            {% else %}
+                <p class="tip">没有权限...</p>
+            {% endif %}
+        {% else %}
+            <p class=tip"">
+                <a href="{{ url_for('auth.login') }}">登陆</a>或者
+                <a href="{{ url_for('auth.register') }}">注册</a>后发表评论
+            </p>
+        {% endif %}
+    {% else %}
+        <p class="tip">评论功能关闭</p>
+    {% endif %}
+</div>

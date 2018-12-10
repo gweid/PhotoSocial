@@ -1,0 +1,28 @@
+{% extends 'admin/index.html' %}
+{% from 'bootstrap/form.html' import render_form %}
+{% from 'bootstrap/nav.html' import render_nav_item %}
+
+{% block title %}Edit profile{% endblock %}
+
+{% block content %}
+    <nav>
+        <ol class="breadcrumb">
+            {{ render_breadcrumb_item('admin.index','后台主页') }}
+            {{ render_breadcrumb_item('admin.manage_user','管理用户') }}
+            {{ render_breadcrumb_item('admin.edit_profile_admin','编辑用户') }}
+        </ol>
+    </nav>
+    <div class="page-header">
+        <h1>编辑用户
+            <a class="float-right btn btn-outline-primary" href="{{ url_for('user.index',username=user.username) }}">
+                该用户主页
+            </a>
+        </h1>
+        <div class="card w-100 bg-light">
+            <h3 class="card-header">编辑用户资料</h3>
+            <div class="card-body">
+                {{ render_form(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

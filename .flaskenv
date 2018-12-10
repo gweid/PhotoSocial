@@ -1,0 +1,2 @@
+FLASK_APP=photosocial
+FLASK_ENV=development

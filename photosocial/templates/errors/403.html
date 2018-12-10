@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}403 Error{% endblock %}
+
+{% block content %}
+    <div class="row justify-content-lg-center">
+        <div class="card bg-light w-50">
+            <img class="card-img-top img-fluid" src="{{ url_for('static',filename='images/error.png') }}">
+            <div class="card-body">
+                <h6 class="card-title">403错误</h6>
+                <p class="card=text">被禁止的请求...</p>
+            </div>
+            <div class="card-footer">
+                <div class="float-right">
+                    <a class="btn btn-primary" href="{{ url_for('main.index') }}">返回主页</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
